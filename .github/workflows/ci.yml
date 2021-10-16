@@ -24,6 +24,7 @@ jobs:
         run: ./gradlew test
 
       - name: Docker build
+        if: github.ref == 'refs/heads/release'
         run: |
           docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
           docker build -t backend-cicd .
@@ -32,6 +33,7 @@ jobs:
 
       - name: Deploy
         uses: appleboy/ssh-action@master
+        if: github.ref == 'refs/heads/release'
         with:
           host: ${{ secrets.AWS_HOST }}
           username: ${{ secrets.AWS_USERNAME }}

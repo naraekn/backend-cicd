@@ -9,11 +9,22 @@
 plugins {
     // Apply the application plugin to add support for building a CLI application in Java.
     id 'application'
+
+    // Spring
+    id 'org.springframework.boot' version '2.5.5'
+    id 'io.spring.dependency-management' version '1.0.11.RELEASE'
 }
 
 repositories {
     // Use Maven Central for resolving dependencies.
     mavenCentral()
+}
+
+configurations {
+    developmentOnly
+    runtimeClasspath {
+        extendsFrom developmentOnly
+    }
 }
 
 dependencies {
@@ -22,6 +33,13 @@ dependencies {
 
     // This dependency is used by the application.
     implementation 'com.google.guava:guava:30.1-jre'
+
+    // Spring Boot Web
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+
+    // Spring Developer Tools
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+
 }
 
 application {

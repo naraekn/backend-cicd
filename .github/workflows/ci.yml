@@ -1,0 +1,33 @@
+name: Backend CI
+
+on:
+  push:
+    branches:
+      - main
+      - release
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up JDK 16
+        uses: actions/setup-java@v2
+        with:
+          java-version: '16'
+          distribution: 'adopt'
+
+      - name: Grant execution permission for gradlew
+        run: chmod +x gradlew
+      - name: Test
+        run: ./gradlew test
+
+      - name: Docker build
+        run: |
+          docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+          docker build -t backend-cicd .
+          docker tag backend-cicd naraekn/backend-cicd:${GITHUB_SHA::7}
+          docker push naraekn/backend-cicd:${GITHUB_SHA::7}
+
+

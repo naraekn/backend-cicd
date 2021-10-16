@@ -30,4 +30,20 @@ jobs:
           docker tag backend-cicd naraekn/backend-cicd:${GITHUB_SHA::7}
           docker push naraekn/backend-cicd:${GITHUB_SHA::7}
 
-
+      - name: Deploy
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.AWS_HOST }}
+          username: ${{ secrets.AWS_USERNAME }}
+          key: ${{ secrets.AWS_PRIVATE_KEY }}
+          envs: REPO,IMAGE,GITHUB_SHA
+          script: |
+            docker pull naraekn/backend-cicd:${GITHUB_SHA::7}
+            docker tag naraekn/backend-cicd:${GITHUB_SHA::7} backend-cicd
+            docker stop server
+            docker container rm server
+            docker run -it -d \
+              -p 80:8080 --name server --restart always \
+              --network my-network \
+              -v $(pwd)/setting/application.yml:/application.yml \
+              backend-cicd

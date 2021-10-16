@@ -1,4 +1,4 @@
-package com.naraekn.cicd;
+package com.naraekn.cicd.controllers;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

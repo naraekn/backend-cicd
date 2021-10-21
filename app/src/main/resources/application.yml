@@ -6,3 +6,15 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: test
+  datasource:
+    url: jdbc:h2:mem:backend-cicd
+  jpa:
+    hibernate:
+      ddl-auto: create

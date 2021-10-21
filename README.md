@@ -295,4 +295,56 @@ ssh 키 만들고 ec2 서버에가서 `.ssh/authorized_keys`에 public key를 �
 
 그런다음 Route 53에가서 해당 로드밸런서를 도메인에 연결해주면 된다.
 
+## 프로파일 설정하기
+
+만약 spring에서 `SpringBootTest`와 같이 데이터베이스를 필요로 하는 테스트를 하는 경우에는 추가 설정이 필요하다.
+실제 실행시에는 mariadb를 사용하고 테스트를 하는 경우에만 h2 database를 사용하도록 설정해주자.
+
+먼저 h2-database를 `build.gradle`에 추가하자 (테스트 말고 실행시에도 h2 데이터베이스가 되는 것을 확인해보고 싶어서 `testImplementation` 대신 `runtimeOnly`로 세팅했다)
+
+```groovy
+runtimeOnly 'com.h2database:h2:1.4.200'
+```
+
+그런 다음 `application.yml` 파일에서 profile을 설정해주자
+나는 spring 환경변수가 "test"일 때는 h2 데이터베이스를 사용하도록 설정했다.
+(참고로 프로파일 설정이 최신 spring boot 부터는 바꼈으니 주의하자! - [Config file processing in Spring Boot 2.4](https://spring.io/blog/2020/08/14/config-file-processing-in-spring-boot-2-4))
+
+```yml
+spring:
+  datasource:
+    url: jdbc:mariadb://localhost:3307/backend-cicd
+    username: root
+    password: password
+  jpa:
+    hibernate:
+      ddl-auto: update
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: test
+  datasource:
+    url: jdbc:h2:mem:backend-cicd
+  jpa:
+    hibernate:
+      ddl-auto: create
+      
+```
+
+그리고 test profile로 테스트를 실행하고 싶다면 터미널에서 아래와같이 실행시킨다.
+(`clean`을 붙이는 이유는 이전에 빌드된 것을 사용하지 않고 새로 빌드하기 위해서이다)
+
+```bash
+ SPRING_PROFILES_ACTIVE=test ./gradlew clean test
+```
+
+마지막으로 CI도 수정해주자
+```yml
+- name: Test
+        run: SPRING_PROFILES_ACTIVE=test ./gradlew test
+```
+
 드디어 끝!
